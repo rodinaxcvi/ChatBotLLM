@@ -64,8 +64,7 @@ openai.api_key = openai_api_key
 
 # Import Milvus, which lets you store, index, and manage embedding vectors 
 import pandas as pd 
-from llama_index.storage import Embedding
-from llama_index.embeddings import EmbeddingVectorsFromText
+from llama_index.embeddings import OpenAIEmbedding
 from llama_index.vector_stores import MilvusVectorStore
 from milvus import default_server
 
@@ -81,7 +80,7 @@ vector_store = MilvusVectorStore(
 chatgpt_llm = LLMPredictor(llm=ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo"))
 service_context = ServiceContext.from_defaults(llm_predictor=chatgpt_llm)
 storage_context = StorageContext.from_defaults(vector_store=vector_store)
-vector_transformer = EmbeddingVectorsFromText(llm_predictor=chatgpt_llm, vector_store=vector_store)
+vector_transformer = OpenAIEmbedding(llm_predictor=chatgpt_llm, vector_store=vector_store)
 vectors_data = []
 
 
@@ -111,18 +110,7 @@ for title in wiki_titles:
 
     with open(data_path / f"{title}.txt", 'w', encoding='utf-8') as fp:
         fp.write(wiki_text)
-    embedding = vector_transformer.transform(wiki_text)
-    vector_store.add_embedding(Embedding(embedding=embedding, metadata={'wiki_title': title}))
-
-    vectors_data.append({'wiki_title': title, 'embedding': embedding})
-
-# Convert vectors_data to a DataFrame
-vectors_df = pd.DataFrame(vectors_data)
-# Save the DataFrame to a CSV file
-vectors_df.to_csv("embedded_vectors.csv", index=False)
-
-
-
+    
 
 
 
