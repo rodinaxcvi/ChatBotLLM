@@ -138,6 +138,9 @@ for wiki_title in wiki_titles:
     visualization_data.append(index_data)
 
 
+# Composability allows you to to define lower-level indices for each document, and higher-order indices over a collection of documents. To see how this works, 
+# imagine defining 1) a tree index for the text within each document, and 2) a list index over each tree index (one document) within your collection.
+# Read the docs on composability: https://gpt-index.readthedocs.io/en/latest/core_modules/data_modules/index/composability.html
 from llama_index.indices.composability import ComposableGraph
 graph = ComposableGraph.from_indices(
     GPTSimpleKeywordTableIndex,
@@ -146,6 +149,8 @@ graph = ComposableGraph.from_indices(
     max_keywords_per_chunk=50
 )
 
+
+# Query transformations are kind of long to explain so here's the docs on them: https://gpt-index.readthedocs.io/en/v0.6.9/how_to/query/query_transformations.html
 from llama_index.indices.query.query_transform.base import DecomposeQueryTransform
 decompose_transform = DecomposeQueryTransform(
     chatgpt_llm, verbose=True
@@ -180,6 +185,8 @@ for index in city_indices.values():
     query_engine = index.as_query_engine(service_context=service_context)
     custom_query_engines[index.index_id] = query_engine
 
+
+# Retrievers: https://python.langchain.com/docs/modules/data_connection/retrievers/
 custom_query_engines[graph.root_index.index_id] = graph.root_index.as_query_engine(
     retriever_mode='simple',
     response_mode='tree_summarize',
@@ -189,9 +196,6 @@ custom_query_engines[graph.root_index.index_id] = graph.root_index.as_query_engi
 query_engine = graph.as_query_engine(
     custom_query_engines=custom_query_engines
 )
-
-
-
 
 
 
